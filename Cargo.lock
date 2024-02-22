@@ -182,6 +182,8 @@ version = "1.0.0"
 dependencies = [
  "blake2 0.11.0-pre.3",
  "near-sdk",
+ "serde",
+ "serde_json",
  "uint",
 ]
 

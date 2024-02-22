@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define variables
-CONTRACT_ID="pointzero.testnet"
+CONTRACT_ID="special-desk.testnet"
 FARMER_NEAR_NAME="ChristineK"
 GROUP_NAME="Genesis"
 

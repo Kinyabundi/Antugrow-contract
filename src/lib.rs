@@ -2,7 +2,8 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::{env, near_bindgen};
 use near_sdk::collections::LookupMap;
-use blake2::{Blake2b512, Blake2s256, Digest};
+// use serde::Serialize;
+// use blake2::{Blake2b512, Blake2s256, Digest};
 
 // Define the contract
 #[near_bindgen]
@@ -11,6 +12,8 @@ pub struct Antugrow {
     pub near_names: LookupMap<String, String>,
     pub farmer_wallets: LookupMap<String, String>,
 }
+
+#[near_bindgen]
 
 impl Antugrow {
     pub fn new() -> Self {
@@ -21,15 +24,14 @@ impl Antugrow {
     }
 
     pub fn assign_near_name(&mut self, member_initials: String, group_name: String) -> String {
-        let hashed_initials = Self::hash_initials(&member_initials);
         let mut new_name = String::new();
-        if let Some(_existing_name) = self.near_names.get(&hashed_initials) {
+        if let Some(_existing_name) = self.near_names.get(&member_initials) {
             let unique_identifier = Self::generate_unique_identifier();
-            new_name = format!("{}{}.{}.antugrow.near", hashed_initials, unique_identifier, group_name);
+            new_name = format!("{}{}.{}.antugrow.near", member_initials, unique_identifier, group_name);
         } else {
-            new_name = format!("{}.{}.antugrow.near", hashed_initials, group_name);
+            new_name = format!("{}.{}.antugrow.near", member_initials, group_name);
         }
-        self.near_names.insert(&hashed_initials, &new_name);
+        self.near_names.insert(&member_initials, &new_name);
         new_name
     }
 
@@ -39,16 +41,16 @@ impl Antugrow {
         wallet_name
     }
 
-    pub fn hash_initials(initials: &str) -> String {
-        let mut hasher = Blake2b512::new();
-        hasher.update(initials);
-        let result = hasher.finalize();
-        let mut hex_string = String::new();
-        for byte in result.as_slice(){
-            hex_string.push_str(&format!("{:02x}", byte))
-        }
-        hex_string
-    }
+    // pub fn hash_initials(initials: &str) -> String {
+    //     let mut hasher = Blake2b512::new();
+    //     hasher.update(initials);
+    //     let result = hasher.finalize();
+    //     let mut hex_string = String::new();
+    //     for byte in result.as_slice(){
+    //         hex_string.push_str(&format!("{:02x}", byte))
+    //     }
+    //     hex_string
+    // }
 
     pub fn generate_unique_identifier() -> String {
         let current_block_timestamp = env::block_timestamp();
