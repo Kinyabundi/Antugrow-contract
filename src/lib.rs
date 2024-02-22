@@ -1,25 +1,33 @@
 // Import the necessary NEAR libraries
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::{env, near_bindgen};
-use near_sdk::collections::LookupMap;
-// use serde::Serialize;
-// use blake2::{Blake2b512, Blake2s256, Digest};
+use std::collections::HashMap;
+use near_sdk::serde::{Serialize, Deserialize};
 
 // Define the contract
+#[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize, Debug)]
+#[serde(crate = "near_sdk::serde")]
 #[near_bindgen]
-#[derive(BorshDeserialize, BorshSerialize)]
 pub struct Antugrow {
-    pub near_names: LookupMap<String, String>,
-    pub farmer_wallets: LookupMap<String, String>,
+    pub near_names: HashMap<String, String>,
+    pub farmer_wallets: HashMap<String, String>,
+}
+// Implement the default constructor for the contract
+impl Default for Antugrow {
+    fn default() -> Self {
+        Self {
+            near_names: HashMap::new(),
+            farmer_wallets: HashMap::new(),
+        }
+    }
 }
 
 #[near_bindgen]
-
 impl Antugrow {
     pub fn new() -> Self {
         Self {
-            near_names: LookupMap::new(b"n".to_vec()),
-            farmer_wallets: LookupMap::new(b"w".to_vec()),
+            near_names: HashMap::new(),
+            farmer_wallets: HashMap::new(),
         }
     }
 
@@ -31,26 +39,15 @@ impl Antugrow {
         } else {
             new_name = format!("{}.{}.antugrow.near", member_initials, group_name);
         }
-        self.near_names.insert(&member_initials, &new_name);
+        self.near_names.insert(member_initials.clone(), new_name.clone());
         new_name
     }
 
     pub fn create_custodial_wallet(&mut self, farmer_near_name: String) -> String {
         let wallet_name = format!("{}.custodial", farmer_near_name);
-        self.farmer_wallets.insert(&farmer_near_name, &wallet_name);
+        self.farmer_wallets.insert(farmer_near_name.clone(), wallet_name.clone());
         wallet_name
     }
-
-    // pub fn hash_initials(initials: &str) -> String {
-    //     let mut hasher = Blake2b512::new();
-    //     hasher.update(initials);
-    //     let result = hasher.finalize();
-    //     let mut hex_string = String::new();
-    //     for byte in result.as_slice(){
-    //         hex_string.push_str(&format!("{:02x}", byte))
-    //     }
-    //     hex_string
-    // }
 
     pub fn generate_unique_identifier() -> String {
         let current_block_timestamp = env::block_timestamp();
@@ -62,7 +59,6 @@ impl Antugrow {
 mod tests {
     use super::*;
     use near_sdk::{testing_env, test_utils::VMContextBuilder};
-    // use near_sdk::json_types::ValidAccountId;
 
     fn setup_contract() -> Antugrow {
         let context = VMContextBuilder::new()
